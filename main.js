@@ -32,29 +32,46 @@ const map = new Map({
 
 
 
+
+
+
+const minZoom = 11; // Set your desired minimum zoom level
+
 const labelLayer = new VectorLayer({
   source: new VectorSource({
     url: 'http://localhost:8080/geoserver/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=openlayer:ssa_data_2022_flt&outputFormat=application/json',
     format: new GeoJSON()
   }),
-  style: function(feature) {
-    return new Style({
-      text: new Text({
-        font: '12px Calibri,sans-serif',
-        fill: new Fill({
-          color: '#000'
-        }),
-        stroke: new Stroke({
-          color: '#fff',
-          width: 2
-        }),
-        text: feature.get('school') // Adjust this to the attribute you want to display
-      })
-    });
+  style: function (feature, resolution) {
+    const zoom = map.getView().getZoom();
+    if (zoom >= minZoom) {
+      return new Style({
+        text: new Text({
+          font: 'bold 16px Calibri,sans-serif',
+          fill: new Fill({
+            color: '#000'
+          }),
+          stroke: new Stroke({
+            color: '#fff',
+            width: 2
+          }),
+          text: feature.get('school'), // Adjust this to the attribute you want to display
+          offsetX: 0, // Set horizontal offset 
+          offsetY: -15, // Set vertical offset 
+          textAlign: 'left', // Set text 
+          textBaseline: 'middle' // Set text baseline
+        })
+      });
+    } else {
+      return null; // No style applied if zoom level is below minZoom
+    }
   }
 });
 
 map.addLayer(labelLayer);
+
+
+
 const wmsLayer = new TileLayer({
   source: new TileWMS({
     url: 'http://localhost:8080/geoserver/wms',
